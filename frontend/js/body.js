@@ -1,5 +1,5 @@
 class Body {
-    constructor(scene, texturepath, radius) {
+    constructor(texturepath, radius) {
         const geometry = new THREE.SphereGeometry(radius, 32, 32);
         const texture = new THREE.TextureLoader().load(texturepath);
 
@@ -9,7 +9,6 @@ class Body {
         const material = new THREE.MeshPhongMaterial({map:texture});
 
         this.sphere = new THREE.Mesh(geometry, material);
-        this.scene = scene;
         this.radius = radius;
         this.orbitcolor = 0x0000ff;
 
@@ -24,10 +23,6 @@ class Body {
         this.sphere.position.x = x;
         this.sphere.position.y = y;
         this.sphere.position.z = z;
-
-        this.draw_orbit();
-
-        this.set_prev(x, y, z);
     }
 
     rotate() {
@@ -40,16 +35,4 @@ class Body {
         this.orbitcolor = color;
     }
 
-    draw_orbit() {
-        const material = new THREE.LineBasicMaterial( {color: this.orbitcolor} );
-
-        const points = [];
-        points.push(new THREE.Vector3(this.body_prevpos.x, this.body_prevpos.y, this.body_prevpos.z));
-        points.push(new THREE.Vector3(this.sphere.position.x, this.sphere.position.y, this.sphere.position.z));
-
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const line = new THREE.Line(geometry, material);
-
-        scene.add(line);
-    }
 };
