@@ -57,6 +57,8 @@
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
       const renderer = new THREE.WebGLRenderer({canvas: threebodyCanvas});
 
+      websocket_conn = null;
+
       var canvas = document.getElementById('threebodyCanvas');
       canvas.width  = 1000;
       canvas.height = 600;
@@ -102,7 +104,9 @@
 
 
       document.querySelector('#play-sim').onclick = function(e) {
-          const socket = new WebSocket('ws://localhost:8001');
+          if (!websocket_conn) {
+              websocket_conn = new WebSocket('ws://localhost:8001');
+          }
 
           var coords = [];
           var velocities = [];
@@ -119,7 +123,7 @@
           m2 = parseInt(document.querySelector('#m2').value);
           m3 = parseInt(document.querySelector('#m3').value);
 
-          socket.addEventListener('open', function (event) {
+          websocket_conn.addEventListener('open', function (event) {
               data = JSON.stringify({
                   "b1": {"position": [coords[0], coords[1], coords[2]],
                          "velocity": [velocities[0], velocities[1], velocities[2]],
@@ -132,10 +136,10 @@
                          "mass": m3},
               });
 
-              socket.send(data);
+              websocket_conn.send(data);
           });
 
-          socket.addEventListener('message', function (event) {
+          websocket_conn.addEventListener('message', function (event) {
               data = event.data;
 
               recv = JSON.parse(data)
@@ -155,6 +159,11 @@
       };
 
       document.querySelector('#setup-sim').onclick = function(e) {
+
+          if (websocket_conn) {
+              websocket_conn.close();
+              websocket_conn = null;
+          }
 
           while(scene.children.length > 0){
               scene.remove(scene.children[0]);
