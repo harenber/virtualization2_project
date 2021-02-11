@@ -87,6 +87,20 @@
           renderer.render(scene, camera);
       };
 
+      const draw_orbit = function(body) {
+          const material = new THREE.LineBasicMaterial( {color:body.orbitcolor} );
+
+          const points = [];
+          points.push(new THREE.Vector3(body.body_prevpos.x, body.body_prevpos.y, body.body_prevpos.z));
+          points.push(new THREE.Vector3(body.sphere.position.x, body.sphere.position.y, body.sphere.position.z));
+
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          const line = new THREE.Line(geometry, material);
+
+          scene.add(line);
+      }
+
+
       document.querySelector('#play-sim').onclick = function(e) {
           const socket = new WebSocket('ws://localhost:8001');
 
@@ -129,6 +143,14 @@
               bodies[0].change_pos(recv.b1.x, recv.b1.y, recv.b1.z);
               bodies[1].change_pos(recv.b2.x, recv.b2.y, recv.b2.z);
               bodies[2].change_pos(recv.b3.x, recv.b3.y, recv.b3.z);
+
+              draw_orbit(bodies[0]);
+              draw_orbit(bodies[1]);
+              draw_orbit(bodies[2]);
+
+              bodies[0].set_prev(recv.b1.x, recv.b1.y, recv.b1.z);
+              bodies[1].set_prev(recv.b2.x, recv.b2.y, recv.b2.z);
+              bodies[2].set_prev(recv.b3.x, recv.b3.y, recv.b3.z);
           });
       };
 
@@ -152,9 +174,9 @@
 
           norm_coeff = (m1>m2 && m1>m3) ? m1 : ((m2>m3 && m2>m1) ? m2 : m3);
 
-          bodies[0] = new Body(scene, '/textures/sun.jpg', m1/norm_coeff);
-          bodies[1] = new Body(scene, '/textures/earth.jpg', m2/norm_coeff);
-          bodies[2] = new Body(scene, '/textures/mars.jpg', m3/norm_coeff);
+          bodies[0] = new Body('/textures/sun.jpg', m1/norm_coeff);
+          bodies[1] = new Body('/textures/earth.jpg', m2/norm_coeff);
+          bodies[2] = new Body('/textures/mars.jpg', m3/norm_coeff);
 
           bodies[0].set_orbitcolor(0xff8b22);
           bodies[1].set_orbitcolor(0x6c81ff);
