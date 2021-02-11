@@ -1,5 +1,6 @@
 import asyncio
 import websockets
+import socket
 import json
 import math
 import sqlite3
@@ -53,8 +54,6 @@ async def save_to_db(data):
 
 
 
-
-
 	
 
 async def backend_service(websocket, path):
@@ -64,12 +63,19 @@ async def backend_service(websocket, path):
 	#print(data)
 	await save_to_db(data)
 	await asyncio.sleep(1/60)
-	
-						
+							
 
 	await websocket.send(json.dumps(data))
 
 
-start_server = websockets.serve(backend_service, "0.0.0.0", 8001)
+
+HOST = socket.gethostbyname('project_server')
+PORT = 8001
+#print(HOST)
+#print(PORT)
+
+start_server = websockets.serve(backend_service, HOST, PORT)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
+
+

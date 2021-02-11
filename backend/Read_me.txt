@@ -1,6 +1,16 @@
-At the moment it's possible to communicate with the container from the host machine using ICP. Use the comands:
+We have a server and a client container, to test them:
 
-docker build -t project_server .
-docker run -p 8001:8001 project_server
+cd server/ 
+type this:
+docker build -t my_server .
+docker network create project_network
+docker run --rm --network=project_network --name project_server my_server
 
-And then in the folder client run the pythons script.
+cd client/ 
+type this:
+docker build -t my_client .
+docker run --rm --network=project_network my_client
+
+
+
+The server receives a request from client and send it back. Client prints it.
