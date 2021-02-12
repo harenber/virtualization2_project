@@ -1,0 +1,72 @@
+version: '3.4'
+
+services:
+  arsch:
+    image: nginx:latest
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8888"
+      - "traefik.http.routers.entes.entrypoints=web2"
+      - "traefik.http.routers.entes.tls=true"
+      - "traefik.http.routers.entes.rule=Host(`compass22.physik.uni-wuppertal.de`)"
+
+
+    
+
+
+
+  nsot:
+    image: nsot/nsot:stable
+    restart: always
+    depends_on:
+      - mymysql
+#    ports:
+#      - 127.0.0.1:8990:8990
+    environment:
+      - DB_ENGINE=django.db.backends.mysql
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_HOST=mymysql
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=9999"
+      - "traefik.http.routers.nsot.entrypoints=web"
+      - "traefik.http.routers.nsot.tls=true"
+      - "traefik.http.routers.nsot.rule=Host(`compass22.physik.uni-wuppertal.de`)"
+
+
+
+  mymysql:
+    image: mysql:8
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    user: "1259"
+    volumes:
+      - /home/m1526537/Documents/CSiS/Virtualization2/final_project_hl/myDatabase:/var/lib/mysql
+    environment:
+#      - MYSQL_DATABASE=backdrop
+#      - MYSQL_USER=backdropuser
+#      - MYSQL_PASSWORD=mydbpasswd
+#      - MYSQL_ROOT_PASSWORD=mydbpasswd
+       - MYSQL_DATABASE
+       - MYSQL_ROOT_PASSWORD
+       - MYSQL_USER
+       - MYSQL_PASSWORD
+
+  traefik:
+    image: traefik:2.3
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    ports:
+      - "18888:8888"
+      - "19999:9999"
+      - "18080:8080"
+    command:
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:9999"
+      - "--entrypoints.web2.address=:8888"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+
