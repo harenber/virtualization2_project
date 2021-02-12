@@ -44,6 +44,8 @@
         y <input type="number" id="b3y" step="1" value="0" pattern="\d*"> vy <input type="number" id="b3vy" step="1" value="0" pattern="\d*"> <br>
         z <input type="number" id="b3z" step="1" value="-5" pattern="\d*"> vz <input type="number" id="b3vz" step="1" value="0" pattern="\d*"> <br>
         <br>mass <input type="number" id="m3" min="1" max="10000" value="30" step="1" pattern="\d*"> <br>
+        <br>t0: <input type="number" id="t0" value="0" pattern="\d*"> t1: <input type="number" id="t1" value="100" pattern="\d*"> <br>
+        <br>eps: <input type="number" id="eps" value="0.001" pattern="\d*"><br>
       </p>
       <p>
         <input id="play-sim" type="button" value="Start" disabled>
@@ -123,6 +125,11 @@
           m2 = parseInt(document.querySelector('#m2').value);
           m3 = parseInt(document.querySelector('#m3').value);
 
+          t0 = parseInt(document.querySelector('#t0').value);
+          t1 = parseInt(document.querySelector('#t1').value);
+
+          eps = parseFloat(document.querySelector('#eps').value);
+
           websocket_conn.addEventListener('open', function (event) {
               data = JSON.stringify({
                   "b1": {"position": [coords[0], coords[1], coords[2]],
@@ -134,6 +141,8 @@
                   "b3": {"position": [coords[6], coords[7], coords[8]],
                          "velocity": [velocities[6], velocities[7], velocities[8]],
                          "mass": m3},
+                  "time": [t0, t1],
+                  "epsilon": eps
               });
 
               websocket_conn.send(data);
