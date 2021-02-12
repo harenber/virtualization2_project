@@ -7,7 +7,7 @@ connect_db=sqlite3.connect("Solver_data.db")
 post=connect_db.cursor()
 try:
     post.execute('''CREATE TABLE IF NOT EXISTS Input(
-    Id integer primary key,
+    Id Float primary key,
     t1 int,
     t2 int,
     m1 float,
