@@ -52,8 +52,9 @@ def ODE45(f, tspan, h0, e, y, s):
     return y, h
 
 #--------------------------Inputs
+Id=42.42
 #post.execute(''' Select * from Input where id= (SELECT * from sqlite_sequence where name ='Input')''')
-df = pd.read_sql_query('''Select * from Input  order by Id desc limit 1''', connect_db)
+df = pd.read_sql_query('''Select * from Input  where Id= ?''', connect_db,params=(Id,))
 
 print(df)
 tspan = [df.loc[0,"t1"], df.loc[0,"t2"]]
@@ -66,26 +67,15 @@ y, h = ODE45(f, tspan, h0, e, y0, s) # modifies t, y, h
 
 
 
-#tspan = [0, 30]
-#m = [5, 3, 4]
-#h0 = 1
-#y0 = [1,-1,0,1,3,0,-2,-1,0,0,0,0,0,0,0,0,0,0]
-#e = 1e-9 # Has to be greater than first step delta (huh??)
-#s = 0.9
-#y, h = ODE45(f, tspan, h0, e, y0, s) # modifies t, y, h
-#--------------------------Outputs 
-# csv also possible
-#np.savetxt('y.txt',y,fmt='%1.4e',delimiter=',')
-#np.savetxt('h.txt', h)
-
 ##----------------------------------------solver-end----------------------##
 
 #inserting data to DB:
 
-post.execute('''Drop table IF EXISTS Output ''')
+new_Id=str(Id).replace(".","_")
+post.execute('''Drop table IF EXISTS Output'''+new_Id)
 
 try:
-    post.execute('''CREATE TABLE Output(
+    post.execute(''' CREATE TABLE Output '''+ new_Id+'''(
     y1 double precision,
     y2 double precision,
     y3 double precision,
@@ -113,7 +103,7 @@ else:
 #inserting Data into DB:        
 try:
     for row in y:
-        post.execute('''INSERT INTO Output(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',row)
+        post.execute('''INSERT INTO Output'''+new_Id+'''(y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''',row)
 except Exception as E:
     print('Error : ', E)
 else:
