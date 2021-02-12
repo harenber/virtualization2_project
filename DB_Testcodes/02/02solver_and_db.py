@@ -75,7 +75,7 @@ new_Id=str(Id).replace(".","_")
 post.execute('''Drop table IF EXISTS Output'''+new_Id)
 
 try:
-    post.execute(''' CREATE TABLE Output '''+ new_Id+'''(
+    post.execute(''' CREATE TABLE Output'''+ new_Id+'''(
     y1 double precision,
     y2 double precision,
     y3 double precision,
