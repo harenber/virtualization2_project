@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Three-body problem</title>
+    <style>
+      .row {
+          display: flex;
+      }
+      .column {
+          flex: 50%;
+          margin-right: 50px;
+      }
+      body { margin: 0; }
+    </style>
+  </head>
+  <body>
+    <script src="lib/three.js"></script>
+    <script src="lib/OrbitControls.js"></script>
+    <script src="js/body.js"></script>
+
+    <div class="row">
+      <div class="column">
+      <canvas id="threebodyCanvas" width="100" height="100"></canvas>
+      </div>
+
+      <div class="column">
+      <p>Body #1<br><br>
+        x <input type="number" id="b1x" step="1" value="0" pattern="\d*"> vx <input type="number" id="b1vx" step="1" value="0" pattern="\d*"> <br>
+        y <input type="number" id="b1y" step="1" value="0" pattern="\d*"> vy <input type="number" id="b1vy" step="1" value="0" pattern="\d*"> <br>
+        z <input type="number" id="b1z" step="1" value="0" pattern="\d*"> vz <input type="number" id="b1vz" step="1" value="0" pattern="\d*"> <br>
+        <br>mass <input type="number" id="m1" min="1" max="10000" value="50" step="1" pattern="\d*"> <br>
+      </p>
+
+      <p>Body #2<br><br>
+        x <input type="number" id="b2x" step="1" value="0" pattern="\d*"> vx <input type="number" id="b2vx" step="1" value="0" pattern="\d*"> <br>
+        y <input type="number" id="b2y" step="1" value="0" pattern="\d*"> vy <input type="number" id="b2vy" step="1" value="0" pattern="\d*"> <br>
+        z <input type="number" id="b2z" step="1" value="5" pattern="\d*"> vz <input type="number" id="b2vz" step="1" value="0" pattern="\d*"> <br>
+        <br>mass <input type="number" id="m2" min="1" max="10000" value="10" step="1" pattern="\d*"> <br>
+      </p>
+
+      <p>Body #3<br><br>
+        x <input type="number" id="b3x" step="1" value="0" pattern="\d*"> vx <input type="number" id="b3vx" step="1" value="0" pattern="\d*"> <br>
+        y <input type="number" id="b3y" step="1" value="0" pattern="\d*"> vy <input type="number" id="b3vy" step="1" value="0" pattern="\d*"> <br>
+        z <input type="number" id="b3z" step="1" value="-5" pattern="\d*"> vz <input type="number" id="b3vz" step="1" value="0" pattern="\d*"> <br>
+        <br>mass <input type="number" id="m3" min="1" max="10000" value="30" step="1" pattern="\d*"> <br>
+        <br>t0: <input type="number" id="t0" value="0" pattern="\d*"> t1: <input type="number" id="t1" value="100" pattern="\d*"> <br>
+        <br>eps: <input type="number" id="eps" value="0.001" pattern="\d*"><br>
+      </p>
+      <p>
+        <input id="play-sim" type="button" value="Start" disabled>
+        <input id="setup-sim" type="button" value="Setup">
+      </p>
+      </div>
+    </div>
+
+    <script>
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+      const renderer = new THREE.WebGLRenderer({canvas: threebodyCanvas});
+
+      websocket_conn = null;
+
+      var canvas = document.getElementById('threebodyCanvas');
+      canvas.width  = 1000;
+      canvas.height = 600;
+
+      renderer.setSize(canvas.width, canvas.height);
+
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+      const stars = new THREE.TextureLoader().load('/textures/stars.jpg');
+      stars.wrapS = THREE.RepeatWrapping;
+      stars.wrapT = THREE.RepeatWrapping;
+
+      scene.background = stars;
+
+      camera.position.set(-0.15, -13.7, 5.5);
+      controls.update();
+
+      const light = new THREE.AmbientLight(0xffffed);
+
+      var axes = ['b1x', 'b1y', 'b1z', 'b2x', 'b2y', 'b2z', 'b3x', 'b3y', 'b3z']
+      var vel = ['b1vx', 'b1vy', 'b1vz', 'b2vx', 'b2vy', 'b2vz', 'b3vx', 'b3vy', 'b3vz']
+      var bodies = [];
+
+      const animate = function () {
+          requestAnimationFrame(animate);
+
+          controls.update();
+          renderer.render(scene, camera);
+      };
+
+      const draw_orbit = function(body) {
+          const material = new THREE.LineBasicMaterial( {color:body.orbitcolor} );
+
+          const points = [];
+          points.push(new THREE.Vector3(body.body_prevpos.x, body.body_prevpos.y, body.body_prevpos.z));
+          points.push(new THREE.Vector3(body.sphere.position.x, body.sphere.position.y, body.sphere.position.z));
+
+          const geometry = new THREE.BufferGeometry().setFromPoints(points);
+          const line = new THREE.Line(geometry, material);
+
+          scene.add(line);
+      }
+
+
+      document.querySelector('#play-sim').onclick = function(e) {
+          if (!websocket_conn) {
+              //websocket_conn = new WebSocket('ws://localhost:8001');
+			websocket_conn = new WebSocket('ws://172.21.0.2:8001');
+			console.log('This example is different!');
+//			HOST = socket.gethostbyname('project_server')
+	//		PORT = 8001  
+		//	uri = "ws://"+str(HOST)+":"+str(PORT)
+			//websocket_conn = new WebSocket(uri);
+			//const dns = require('dns')
+			//dns.lookup('project_server', function(err, result) {
+			//	console.log(result)
+			//})
+          }
+
+          var coords = [];
+          var velocities = [];
+
+          for (var i = 0; i < axes.length; ++i) {
+              coords[i] = parseInt(document.querySelector('#' + axes[i]).value);
+          }
+
+          for (var i = 0; i < axes.length; ++i) {
+              velocities[i] = parseInt(document.querySelector('#' + vel[i]).value);
+          }
+
+          m1 = parseInt(document.querySelector('#m1').value);
+          m2 = parseInt(document.querySelector('#m2').value);
+          m3 = parseInt(document.querySelector('#m3').value);
+
+          t0 = parseInt(document.querySelector('#t0').value);
+          t1 = parseInt(document.querySelector('#t1').value);
+
+          eps = parseFloat(document.querySelector('#eps').value);
+
+          websocket_conn.addEventListener('open', function (event) {
+              data = JSON.stringify({
+                  "b1": {"position": [coords[0], coords[1], coords[2]],
+                         "velocity": [velocities[0], velocities[1], velocities[2]],
+                         "mass": m1},
+                  "b2": {"position": [coords[3], coords[4], coords[5]],
+                         "velocity": [velocities[3], velocities[4], velocities[5]],
+                         "mass": m2},
+                  "b3": {"position": [coords[6], coords[7], coords[8]],
+                         "velocity": [velocities[6], velocities[7], velocities[8]],
+                         "mass": m3},
+                  "time": [t0, t1],
+                  "epsilon": eps
+              });
+
+              websocket_conn.send(data);
+          });
+
+          websocket_conn.addEventListener('message', function (event) {
+              data = event.data;
+
+              recv = JSON.parse(data)
+
+              bodies[0].change_pos(recv.b1.x, recv.b1.y, recv.b1.z);
+              bodies[1].change_pos(recv.b2.x, recv.b2.y, recv.b2.z);
+              bodies[2].change_pos(recv.b3.x, recv.b3.y, recv.b3.z);
+
+              draw_orbit(bodies[0]);
+              draw_orbit(bodies[1]);
+              draw_orbit(bodies[2]);
+
+              bodies[0].set_prev(recv.b1.x, recv.b1.y, recv.b1.z);
+              bodies[1].set_prev(recv.b2.x, recv.b2.y, recv.b2.z);
+              bodies[2].set_prev(recv.b3.x, recv.b3.y, recv.b3.z);
+          });
+      };
+
+      document.querySelector('#setup-sim').onclick = function(e) {
+
+          if (websocket_conn) {
+              websocket_conn.close();
+              websocket_conn = null;
+          }
+
+          while(scene.children.length > 0){
+              scene.remove(scene.children[0]);
+          }
+
+          scene.add(light);
+
+          bodies = [];
+
+          play_sim = document.querySelector('#play-sim');
+
+          play_sim.disabled = false;
+
+          m1 = parseInt(document.querySelector('#m1').value);
+          m2 = parseInt(document.querySelector('#m2').value);
+          m3 = parseInt(document.querySelector('#m3').value);
+
+          norm_coeff = (m1>m2 && m1>m3) ? m1 : ((m2>m3 && m2>m1) ? m2 : m3);
+
+          bodies[0] = new Body('/textures/sun.jpg', m1/norm_coeff);
+          bodies[1] = new Body('/textures/earth.jpg', m2/norm_coeff);
+          bodies[2] = new Body('/textures/mars.jpg', m3/norm_coeff);
+
+          bodies[0].set_orbitcolor(0xff8b22);
+          bodies[1].set_orbitcolor(0x6c81ff);
+          bodies[2].set_orbitcolor(0x4ccd7a);
+
+          var coords = [];
+
+          for (var i = 0; i < axes.length; ++i) {
+              coords[i] = parseInt(document.querySelector('#' + axes[i]).value);
+          }
+
+          for (var i = 0; i < bodies.length; ++i) {
+              bodies[i].change_pos(coords[i*3], coords[i*3+1], coords[i*3+2]);
+              bodies[i].set_prev(coords[i*3], coords[i*3+1], coords[i*3+2]);
+              scene.add(bodies[i].sphere);
+          }
+
+          animate();
+      };
+
+    </script>
+  </body>
+</html>
+

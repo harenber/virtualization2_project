@@ -7,6 +7,7 @@ async def backend_client():
 	HOST = socket.gethostbyname('project_server')
 	PORT = 8001  
 	uri = "ws://"+str(HOST)+":"+str(PORT)
+	
 	async with websockets.connect(uri) as websocket:	
 
 		#Initializing a dummy data structure of spected request
@@ -63,13 +64,13 @@ async def backend_client():
 		}
 
 		
-		data=json.dumps(data)
+		#data=json.dumps(data)
 		
-		await websocket.send(data)
+		#await websocket.send(data)
 		
-		initial = await websocket.recv()
-		print(initial)
-
+		#initial = await websocket.recv()
+		#print(initial)
+		print(uri)
 
 
 

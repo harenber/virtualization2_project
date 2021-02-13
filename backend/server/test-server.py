@@ -60,12 +60,18 @@ async def backend_service(websocket, path):
 	initial = await websocket.recv()
 
 	data = json.loads(initial)
-	#print(data)
-	await save_to_db(data)
+	print(data)
+	#await save_to_db(data)
 	await asyncio.sleep(1/60)
 							
-
-	await websocket.send(json.dumps(data))
+	
+	for i in range (1,100):
+		data = {
+		        "b1": {"x": i*0.1, "y": 0, "z": 0},
+		        "b2": {"x": 1, "y": 1, "z": 0},
+		        "b3": {"x": 1, "y": 1, "z": 0}
+		    }
+		await websocket.send(json.dumps(data))
 
 
 
