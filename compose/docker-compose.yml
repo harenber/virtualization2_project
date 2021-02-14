@@ -3,13 +3,16 @@ version: '3.4'
 services:
   project_server:
     build: ../backend/server
-    restart: always
+#    restart: always
     container_name: project_server
+    ports:
+      - "8001:8001"
     volumes:
       - ../backend/server:/server
 #    labels:
 #      - "traefik.enable=true"
-#      - "traefik.docker.network=project_network"
+#      - "traefik.port=8000"
+
 
   frontend:
     build: ../build/frontend_container
@@ -23,7 +26,6 @@ services:
       - "traefik.http.routers.myrouter.entrypoints=frontend1"
       - "traefik.http.routers.myrouter.tls=true"
       - "traefik.http.routers.myrouter.rule=Host(`${HOST}`)"
-#      - "traefik.docker.network=project_network"
 
       
 
@@ -31,11 +33,10 @@ services:
     build: ../solver_test
     restart: always
     container_name: solver
+    depends_on:
+      - project_server
     volumes:
       - ../backend/server:/solver
-#    labels:
-#     - "traefik.enable=true"
-#      - "traefik.docker.network=project_network"      
       
   traefik:
     image: traefik:2.3
@@ -49,5 +50,4 @@ services:
       - "--entrypoints.frontend1.address=:8000"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-#      - "--providers.docker.network=project_network"
 
