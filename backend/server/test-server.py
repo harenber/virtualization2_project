@@ -4,7 +4,7 @@ import socket
 import json
 import math
 import sqlite3
-
+import time
 
 async def save_to_db(data):
 	connect_db=sqlite3.connect("Solver_data.db")
@@ -34,7 +34,7 @@ async def save_to_db(data):
 	vx1, vx2, vx3 = data['b1']['velocity'][0], data['b2']['velocity'][0], data['b3']['velocity'][0]
 	vy1, vy2, vy3 = data['b1']['velocity'][1], data['b2']['velocity'][1], data['b3']['velocity'][1]
 	vz1, vz2, vz3 = data['b1']['velocity'][2], data['b2']['velocity'][2], data['b3']['velocity'][2]
-	Id, e, h ,s = data['Id'], data['epsilon'], data['h'], data['s']
+	Id, e, h ,s = round(time.time()), data['epsilon'], 0.1, 0.9
 
 	print(data)
 
@@ -48,23 +48,29 @@ async def save_to_db(data):
 	else:
 		connect_db.commit()
 		print('Data inserted')
+		return Id
 
 
 
 
+async def send_id_to_solver(Id):
+	HOST = socket.gethostbyname('solver')
+	PORT = 8002  
+	uri = "ws://"+str(HOST)+":"+str(PORT)
+	async with websockets.connect(uri) as websocket:
+		await websocket.send(Id)
 
-
-	
 
 async def backend_service(websocket, path):
 	initial = await websocket.recv()
 
 	data = json.loads(initial)
 	print(data)
-	#await save_to_db(data)
+	Id=await save_to_db(data)
 	await asyncio.sleep(1/60)
-							
-	
+	await asyncio.sleep(1/60)
+	await send_id_to_solver(str(Id))
+
 	for i in range (1,100):
 		data = {
 		        "b1": {"x": i*0.1, "y": 0, "z": 0},
@@ -77,11 +83,9 @@ async def backend_service(websocket, path):
 
 HOST = socket.gethostbyname('project_server')
 PORT = 8001
-#print(HOST)
+print(HOST)
 #print(PORT)
 
 start_server = websockets.serve(backend_service, HOST, PORT)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
-
-

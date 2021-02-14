@@ -107,17 +107,8 @@
 
       document.querySelector('#play-sim').onclick = function(e) {
           if (!websocket_conn) {
-              //websocket_conn = new WebSocket('ws://localhost:8001');
-			websocket_conn = new WebSocket('ws://172.21.0.2:8001');
-			console.log('This example is different!');
-//			HOST = socket.gethostbyname('project_server')
-	//		PORT = 8001  
-		//	uri = "ws://"+str(HOST)+":"+str(PORT)
-			//websocket_conn = new WebSocket(uri);
-			//const dns = require('dns')
-			//dns.lookup('project_server', function(err, result) {
-			//	console.log(result)
-			//})
+            //websocket_conn = new WebSocket('ws://localhost:8001');
+			websocket_conn = new WebSocket('ws://172.18.0.2:8001');
           }
 
           var coords = [];

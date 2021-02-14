@@ -4,7 +4,7 @@ cd server/
 type this:
 docker build -t my_server .
 docker network create project_network
-docker run --rm --network=project_network --name project_server my_server
+docker run --rm  -v "$(pwd)":/server --network=project_network --name project_server my_server
 
 cd client/ 
 type this:
