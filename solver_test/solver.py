@@ -136,6 +136,3 @@ PORT = 8002
 start_server = websockets.serve(get_input_from_backend, HOST, PORT)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
-
-
-
