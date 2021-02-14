@@ -5,6 +5,7 @@ import json
 import math
 import sqlite3
 import time
+import pandas as pd
 
 async def save_to_db(data):
 	connect_db=sqlite3.connect("Solver_data.db")
@@ -34,9 +35,9 @@ async def save_to_db(data):
 	vx1, vx2, vx3 = data['b1']['velocity'][0], data['b2']['velocity'][0], data['b3']['velocity'][0]
 	vy1, vy2, vy3 = data['b1']['velocity'][1], data['b2']['velocity'][1], data['b3']['velocity'][1]
 	vz1, vz2, vz3 = data['b1']['velocity'][2], data['b2']['velocity'][2], data['b3']['velocity'][2]
-	Id, e, h ,s = round(time.time()), data['epsilon'], 0.1, 0.9
+	Id, e, h ,s = time.time(), data['epsilon'], 0.1, 0.9
 
-	print(data)
+	#print(data)
 
 
 	data_tuple=(Id,t1,t2,m1,m2,m3,x1,x2,x3,y1,y2,y3,z1,z2,z3,vx1,vx2,vx3,vy1,vy2,vy3,vz1,vz2,vz3,h,e,s)
@@ -65,19 +66,40 @@ async def backend_service(websocket, path):
 	initial = await websocket.recv()
 
 	data = json.loads(initial)
-	print(data)
+	#print(data)
 	Id=await save_to_db(data)
 	await asyncio.sleep(1/60)
 	await asyncio.sleep(1/60)
 	await send_id_to_solver(str(Id))
 
-	for i in range (1,100):
+
+
+	connect_db=sqlite3.connect("Solver_data.db")
+	post=connect_db.cursor()
+	
+	
+	new_Id=str(Id).replace(".","_") 
+	#post.execute(''' Select * from Input where id= (SELECT * from sqlite_sequence where name ='Input')''')
+	df=pd.read_sql_query('''Select y1,y2,y3,y4,y5,y6,y7,y8,y9 from output'''+new_Id, connect_db)
+	b1=pd.read_sql_query('''Select y1,y2,y3 from output'''+new_Id, connect_db)
+	b2=pd.read_sql_query('''Select y4,y5,y6 from output'''+new_Id, connect_db)
+	b3=pd.read_sql_query('''Select y7,y8,y9 from output'''+new_Id, connect_db)
+
+
+	b1=json.loads(b1.to_json(orient="split"))
+	b2=json.loads(b2.to_json(orient="split"))
+	b3=json.loads(b3.to_json(orient="split"))
+	
+	print(b1['data'][0])
+	
+	for i in range(0,len(b1['data'])):
 		data = {
-		        "b1": {"x": i*0.1, "y": 0, "z": 0},
-		        "b2": {"x": 1, "y": 1, "z": 0},
-		        "b3": {"x": 1, "y": 1, "z": 0}
+		        "b1": {"x": b1['data'][i][0], "y": b1['data'][i][1], "z": b1['data'][i][2]},
+		        "b2": {"x": b2['data'][i][0], "y": b2['data'][i][1], "z": b2['data'][i][2]},
+		        "b3": {"x": b3['data'][i][0], "y": b3['data'][i][1], "z": b3['data'][i][2]}
 		    }
 		await websocket.send(json.dumps(data))
+		await asyncio.sleep(1/30)
 
 
 

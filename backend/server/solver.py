@@ -128,7 +128,7 @@ async def get_input_from_backend(websocket, path):
 	    print('Data inserted')
 	#..............................................................................................................................................
 	connect_db.commit()
-	connect_db.close()
+	#connect_db.close()
 
 
 HOST = socket.gethostbyname('solver')

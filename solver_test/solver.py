@@ -128,7 +128,7 @@ async def get_input_from_backend(websocket, path):
 	    print('Data inserted')
 	#..............................................................................................................................................
 	connect_db.commit()
-	connect_db.close()
+	#connect_db.close()
 
 
 HOST = socket.gethostbyname('solver')
@@ -136,3 +136,6 @@ PORT = 8002
 start_server = websockets.serve(get_input_from_backend, HOST, PORT)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
+
+
+
