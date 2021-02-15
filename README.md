@@ -3,8 +3,10 @@ In this repo we'll have the code we develop for the Virtualization2 Project:
 
 Implement webserver to solve the 3-Body problem using a RK method and show the results graphycally in a containerized manner.
 
+Right now works with docker-compose  the docker compose file is in compose folder. Simply Run docker-compose up and then visit https://localhost:8123/
+-------------------------------------------------------------------------------------------------------------------------------------------------------
 
-To test, do:
+To test without docker compose, do:
 sudo docker network create project_network
 
 YOu'll need three terminals or run in detatch mode:
