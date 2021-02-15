@@ -28,3 +28,12 @@ sudo docker run -v ~/Documents/virtualization2_project/backend/server:/solver --
 
 
 Open your broswer and go to http://0.0.0.0:8123/
+
+side note: 
+
+using -v: Consists of three fields, separated by colon characters (:). The fields must be in the correct order, and the meaning of each field is not immediately obvious.
+In the case of named volumes, the first field is the name of the volume, and is unique on a given host machine. For anonymous volumes, the first field is omitted.
+The second field is the path where the file or directory are mounted in the container.
+Source:https://docs.docker.com/storage/volumes/
+
+--You might have to change the address if you save folder in diffrent location.
