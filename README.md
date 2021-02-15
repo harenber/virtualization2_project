@@ -7,26 +7,30 @@ Right now works with docker-compose. The docker compose file is in /compose fold
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 
 To test without docker compose, do:
+```bash
 sudo docker network create project_network
-
+```
 YOu'll need three terminals or run in detatch mode:
 
 Then:
 in  virtualization2_project/backend/server
+```bash
 sudo docker build -t my_server .
 sudo docker run --rm  -v "$(pwd)":/server --network=project_network --name project_server my_server
-
+```
 Then, do:
 in virtualization2_project/build/frontend_container
+```bash
 sudo docker build -t frontend .
 sudo docker run --rm -it --network=project_network -p 8123:8000 frontend
-
+```
 
 then do:
 in virtualization2_project/solver_test
+```bash
 sudo docker build -t solver .
 sudo docker run -v ~/Documents/virtualization2_project/backend/server:/solver --rm --network=project_network --name=solver solver
-
+```
 
 
 Open your broswer and go to http://0.0.0.0:8123/
