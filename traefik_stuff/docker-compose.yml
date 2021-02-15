@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  arsch:
+  mynginx:
     image: nginx:latest
     restart: always
     labels:
@@ -46,10 +46,6 @@ services:
     volumes:
       - /home/m1526537/Documents/CSiS/Virtualization2/final_project_hl/myDatabase:/var/lib/mysql
     environment:
-#      - MYSQL_DATABASE=backdrop
-#      - MYSQL_USER=backdropuser
-#      - MYSQL_PASSWORD=mydbpasswd
-#      - MYSQL_ROOT_PASSWORD=mydbpasswd
        - MYSQL_DATABASE
        - MYSQL_ROOT_PASSWORD
        - MYSQL_USER

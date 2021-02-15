@@ -3,17 +3,18 @@ version: '3.4'
 services:
   project_server:
     build: ../backend/server
-#    restart: always
+    restart: always
     container_name: project_server
-    ports:
-      - "8001:8001"
     volumes:
       - ../backend/server:/server
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.port=8000"
-
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.port=8001"
+      - "traefik.http.routers.mywebsocket.entrypoints=server1"
+      - "traefik.http.routers.mywebsocket.tls=false"
+# 	decrypted because websocket cannot add self signed certs to list-of-accepted-certs
+      - "traefik.http.routers.mywebsocket.rule=Host(`${HOST}`)"
+      
   frontend:
     build: ../build/frontend_container
     restart: always
@@ -45,9 +46,12 @@ services:
     ports:
       - "8123:8000"
       - "18080:8080"
+      - "8001:8001"
     command:
+      - "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--entrypoints.frontend1.address=:8000"
+      - "--entrypoints.server1.address=:8001"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
 

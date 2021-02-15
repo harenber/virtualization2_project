@@ -107,7 +107,7 @@
 
       document.querySelector('#play-sim').onclick = function(e) {
           if (!websocket_conn) {
-            //websocket_conn = new WebSocket('ws://localhost:8001');
+            //websocket_conn = new WebSocket('wss://localhost:8001');
 			websocket_conn = new WebSocket('ws://' + window.location.hostname+ ':8001');
           }
 

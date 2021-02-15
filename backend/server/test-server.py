@@ -56,7 +56,7 @@ async def save_to_db(data):
 
 async def send_id_to_solver(Id):
 	HOST = socket.gethostbyname('solver')
-	PORT = 8002  
+	PORT = 8002
 	uri = "ws://"+str(HOST)+":"+str(PORT)
 	async with websockets.connect(uri) as websocket:
 		await websocket.send(Id)
@@ -64,7 +64,7 @@ async def send_id_to_solver(Id):
 
 async def backend_service(websocket, path):
 	initial = await websocket.recv()
-
+	print(initial)
 	data = json.loads(initial)
 	#print(data)
 	Id=await save_to_db(data)
@@ -103,6 +103,7 @@ async def backend_service(websocket, path):
 
 
 
+print("Hello Jose")
 HOST = socket.gethostbyname('project_server')
 PORT = 8001
 print(HOST)
