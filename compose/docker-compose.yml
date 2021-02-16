@@ -3,12 +3,11 @@ version: '3.4'
 services:
   project_server:
     build: ../backend/server
-    image: 127.0.0.1:5000/server
+    image: 127.0.0.1:5000/server   #intended for stack purpuses, unused
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 5
     restart: always
-   # container_name: project_server
     volumes:
       - ../backend/server:/server
     labels:
@@ -21,11 +20,10 @@ services:
       
   frontend:
     build: ../build/frontend_container
-    image: 127.0.0.1:5000/frontend
+    image: 127.0.0.1:5000/frontend   #intended for stack purpuses, unused
     restart: always
     container_name: frontend
-#    depends_on:
-#      - project_server
+
     labels:
       - "traefik.enable=true"
       - "traefik.port=8000"
@@ -53,60 +51,5 @@ services:
 
 
 
-#version: '3.4'
-
-#services:
-#  project_server:
-#    build: ../backend/server
-#    restart: always
-#    container_name: project_server
-#    volumes:
-#      - ../backend/server:/server
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.port=8001"
-#      - "traefik.http.routers.mywebsocket.entrypoints=server1"
-#      - "traefik.http.routers.mywebsocket.tls=false"
-## 	decrypted because websocket cannot add self signed certs to list-of-accepted-certs
-#      - "traefik.http.routers.mywebsocket.rule=Host(`${HOST}`)"
-#      
-#  frontend:
-#    build: ../build/frontend_container
-#    restart: always
-#    container_name: frontend
-#    depends_on:
-#      - project_server
-#    labels:
-#      - "traefik.enable=true"
-#      - "traefik.port=8000"
-#      - "traefik.http.routers.myrouter.entrypoints=frontend1"
-#      - "traefik.http.routers.myrouter.tls=true"
-#      - "traefik.http.routers.myrouter.rule=Host(`${HOST}`)"
-
-#      
-
-##  solver:
-##    build: ../solver_test
-##    restart: always
-##    container_name: solver
-##    depends_on:
-##      - project_server
-##    volumes:
-##      - ../backend/server:/solver
-#      
-#  traefik:
-#    image: traefik:2.3
-#    volumes:
-#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-#    ports:
-#      - "8123:8000"
-#      - "18080:8080"
-#      - "8001:8001"
-#    command:
-#      - "--log.level=DEBUG"
-#      - "--api.insecure=true"
-#      - "--entrypoints.frontend1.address=:8000"
-#      - "--entrypoints.server1.address=:8001"
-#      - "--providers.docker=true"
-#      - "--providers.docker.exposedbydefault=false"
+#
 

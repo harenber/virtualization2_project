@@ -209,7 +209,7 @@ async def backend_service(websocket, path):
 	b2=json.loads(b2.to_json(orient="split"))
 	b3=json.loads(b3.to_json(orient="split"))
 	
-	print(b1['data'][0])
+	print('---------------->Ploting started!!!!')
 	
 	for i in range(0,len(b1['data'])):
 		data = {
