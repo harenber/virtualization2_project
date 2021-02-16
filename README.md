@@ -5,6 +5,10 @@ Implement webserver to solve the 3-Body problem using a RK method and show the r
 
 Right now works with docker-compose. The docker compose file is in /compose folder. Simply Run docker-compose up and then visit https://localhost:8123/
 -------------------------------------------------------------------------------------------------------------------------------------------------------
+IMPORTANT: Multiple container version working on...
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+...this branch https://github.com/jomjimenezme/virtualization2_project/tree/scaling-up . In the terminal you can do git checkout scaling-up (Also Run docker-compose up)
+
 
 To test without docker compose, do:
 ```bash
